@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs'
 
 const out = process.argv[2] || 'site';
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-const [major, minor] = pkg.version.split('.');
+const [major, minor] = (pkg.version || '1.0.0').split('.');
 const version = `${major}.${minor}.${process.env.GITHUB_RUN_NUMBER || 0}`;
 
 const sh = (cmd) => {
