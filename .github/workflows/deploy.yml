@@ -1,8 +1,8 @@
-name: Deploy do site para o Github Pages
+name: Deploy
 
 on:
   push:
-    branches: main
+    branches: [master, main]
   workflow_dispatch:
 
 permissions:
@@ -25,7 +25,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20 # com package-lock.json no repo, acrescente: cache: npm
+          node-version: 20
+          cache: npm
 
       - id: pages
         uses: actions/configure-pages@v5
@@ -37,6 +38,19 @@ jobs:
       - name: Instalar dependências
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Verificar variáveis de login
+        env:
+          SPOTIFY: ${{ vars.VITE_SPOTIFY_CLIENT_ID }}
+          GOOGLE: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          DEEZER: ${{ vars.VITE_DEEZER_APP_ID }}
+          BFF: ${{ vars.VITE_BFF_URL }}
+        run: |
+          [ -n "$SPOTIFY" ] || echo "::warning title=Spotify::VITE_SPOTIFY_CLIENT_ID está vazia; o login do Spotify vai falhar"
+          [ -n "$GOOGLE" ]  || echo "::warning title=YouTube::VITE_GOOGLE_CLIENT_ID está vazia; o login do YouTube vai falhar"
+          [ -n "$DEEZER" ]  || echo "::warning title=Deezer::VITE_DEEZER_APP_ID está vazia; o login do Deezer vai falhar"
+          [ -n "$BFF" ]     || echo "::warning title=Deezer::VITE_BFF_URL está vazia; o Deezer precisa do Worker"
+          exit 0
 
       - name: Build do app (PWA em /app/)
         env:
@@ -53,9 +67,6 @@ jobs:
       - name: Montar o site (página inicial + app)
         run: |
           cp -r dist site/app
-          mkdir -p site/assets/css
-          cp -r public/assets/img site/assets/
-          cp .github/site/assets/css/main.css site/assets/css/main.css
           cp .github/site/index.html site/index.html
           touch site/.nojekyll
           if [ -f CNAME ]; then cp CNAME site/CNAME; fi
