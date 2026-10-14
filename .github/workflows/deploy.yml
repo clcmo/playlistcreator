@@ -1,0 +1,102 @@
+name: Deploy do site para o Github Pages
+
+on:
+  push:
+    branches: main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Um deploy por vez; não cancela um que já está publicando.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # histórico completo: o changelog usa git log desde a última tag
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20 # com package-lock.json no repo, acrescente: cache: npm
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      # Gera a versão (major.minor do package.json + nº da execução) e o version.json
+      - id: meta
+        run: node .github/scripts/meta.mjs site
+
+      - name: Instalar dependências
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Build do app (PWA em /app/)
+        env:
+          # base_path vem vazio com domínio próprio e "/repo" no github.io/repo
+          VITE_BASE: ${{ steps.pages.outputs.base_path }}/app/
+          VITE_APP_VERSION: ${{ env.APP_VERSION }}
+          # IDs públicos: cadastre em Settings > Secrets and variables > Actions > Variables
+          VITE_SPOTIFY_CLIENT_ID: ${{ vars.VITE_SPOTIFY_CLIENT_ID }}
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+          VITE_DEEZER_APP_ID: ${{ vars.VITE_DEEZER_APP_ID }}
+          VITE_BFF_URL: ${{ vars.VITE_BFF_URL }}
+        run: npm run build
+
+      - name: Montar o site (página inicial + app)
+        run: |
+          cp -r dist site/app
+          cp .github/site/index.html site/index.html
+          touch site/.nojekyll
+          if [ -f CNAME ]; then cp CNAME site/CNAME; fi
+          (cd dist && zip -qr "../playlist-creator-v${APP_VERSION}.zip" .)
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-zip
+          path: playlist-creator-v*.zip
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Só roda se o deploy deu certo: cria a tag vX.Y.Z e a Release com o zip do app.
+  release:
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-zip
+      - name: Criar a Release
+        run: |
+          gh release create "v${VERSION}" ./*.zip \
+            --target "$GITHUB_SHA" \
+            --title "v${VERSION}" \
+            --generate-notes
