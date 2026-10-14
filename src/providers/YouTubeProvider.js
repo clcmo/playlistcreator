@@ -12,6 +12,7 @@ export class YouTubeProvider extends Provider {
 
   // Google Identity Services (popup, sem redirecionamento).
   login() {
+    if (!CLIENT_ID) return Promise.reject(new Error('VITE_GOOGLE_CLIENT_ID está vazio neste build'));
     return new Promise((resolve, reject) => {
       const client = window.google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
@@ -33,7 +34,12 @@ export class YouTubeProvider extends Provider {
       ...init,
       headers: { Authorization: `Bearer ${s.token}`, 'Content-Type': 'application/json' }
     });
-    if (!res.ok) throw new Error(`YouTube ${res.status}`);
+    if (!res.ok) {
+      // Mostra o motivo que a API devolve (accessNotConfigured, quotaExceeded, etc.)
+      const body = await res.json().catch(() => ({}));
+      const why = body.error?.errors?.[0]?.reason || body.error?.message || '';
+      throw new Error(`YouTube ${res.status}${why ? `: ${why}` : ''}`);
+    }
     return res.json();
   }
 
