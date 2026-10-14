@@ -8,6 +8,28 @@ const API = 'https://api.spotify.com/v1';
 const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)))
   .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
+async function readResponse(res, service, forbiddenHint = '') {
+  const text = await res.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    if (res.ok) throw new Error(`${service}: resposta inválida (não é JSON)`);
+    const detail = text.trim().slice(0, 500) || res.statusText;
+    const hint = res.status === 403 ? forbiddenHint : '';
+    throw new Error(`${service} ${res.status}: ${detail}${hint}`);
+  }
+
+  if (!res.ok) {
+    const detail = typeof data.error === 'string'
+      ? data.error
+      : data.error?.message || data.error?.reason || data.error_description || text.trim().slice(0, 500);
+    const hint = res.status === 403 ? forbiddenHint : '';
+    throw new Error(`${service} ${res.status}${detail ? `: ${detail}` : ''}${hint}`);
+  }
+  return data;
+}
+
 export class SpotifyProvider extends Provider {
   id = 'spotify';
   label = 'Spotify';
@@ -38,7 +60,7 @@ export class SpotifyProvider extends Provider {
         redirect_uri: REDIRECT, code_verifier: sessionStorage.getItem('pc.spotify.verifier')
       })
     });
-    const data = await res.json();
+    const data = await readResponse(res, 'Spotify');
     if (!data.access_token) throw new Error('Falha no login do Spotify');
     Session.set(this.id, data.access_token, data.expires_in);
     return true;
@@ -51,15 +73,11 @@ export class SpotifyProvider extends Provider {
       ...init,
       headers: { Authorization: `Bearer ${s.token}`, 'Content-Type': 'application/json' }
     });
-    const data = await res.json();
-    if (!res.ok) {
-      const detail = data.error?.message || data.error?.reason || '';
-      const hint = res.status === 403
-        ? ' Se o app estiver em modo Development, confira Users and Access e se o proprietário tem Spotify Premium.'
-        : '';
-      throw new Error(`Spotify ${res.status}${detail ? `: ${detail}` : ''}.${hint}`);
-    }
-    return data;
+    return readResponse(
+      res,
+      'Spotify',
+      '. Se o app estiver em modo Development, confira Users and Access e se o proprietário tem Spotify Premium.'
+    );
   }
 
   async findTrack(track) {
