@@ -1,36 +1,20 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#ff1bae" />
-  <title>Playlist Creator</title>
-  <link rel="icon" href="./app/favicon.png" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@1,700;1,800&family=Work+Sans:wght@400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
-  <style>
-    :root { --pink:#ff1bae; --blue:#197aff; --amber:#ffb919; --ink:#14141a; --bg:#fff; --card:#f4f4f8; --muted:#5d5d6b; --line:#14141a22; --link:#0b5ed7; }
-    @media (prefers-color-scheme: dark) { :root { --ink:#f4f4f8; --bg:#14141a; --card:#1d1d26; --muted:#a2a2b3; --line:#ffffff22; --link:#6aa6ff; } }
-    * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 'Work Sans', system-ui, sans-serif; }
-    main { max-width:640px; margin:0 auto; padding:32px 16px 56px; }
-    h1 { margin:0 0 4px; font:italic 800 2.4rem/1.1 'Urbanist', system-ui, sans-serif; }
-    h1 b { color:var(--pink); font-weight:inherit; }
-    h2 { margin:32px 0 8px; font:italic 700 1.3rem 'Urbanist', system-ui, sans-serif; }
-    .btn { display:inline-block; min-height:44px; padding:10px 20px; font-weight:700; color:#14141a; background:var(--pink); border-radius:8px; text-decoration:none; }
-    .btn:focus-visible, a:focus-visible { outline:3px solid var(--blue); outline-offset:2px; }
-    a { color:var(--link); }
-    .current { margin-top:24px; padding:16px; border-left:4px solid var(--amber); background:var(--card); }
-    .current strong { font:italic 700 1.4rem 'Urbanist', system-ui, sans-serif; }
-    .meta { color:var(--muted); font:400 .8rem/1.5 'JetBrains Mono', ui-monospace, monospace; }
-    ul { padding-left:20px; } li { margin:4px 0; }
-    .rel { list-style:none; padding:0; }
-    .rel li { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); }
-  </style>
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ff1bae" />
+    <link rel="icon" type="image/png" href="./public/assets/img/favicon.png" />
+    <link rel="apple-touch-icon" href="./public/assets/img/icon-192.png" />
+    <title>Playlist Creator | Urbanna</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Urbanist:ital,wght@0,600;1,700;1,800&family=Work+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
 <body>
 <main>
-  <h1><b>urb</b>anna</h1>
+  <span className="logo word"><b>urbanna</b></span>
   <p>Entre com Spotify, YouTube ou Deezer e crie a mesma playlist em todos de uma vez.</p>
   <a class="btn" href="./app/">Abrir o app</a>
 
