@@ -30,9 +30,23 @@ main {
   padding: 64px 0;
 }
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.brand-icon {
+  width: clamp(56px, 14vw, 88px);
+  height: clamp(56px, 14vw, 88px);
+  border-radius: 18px;
+  box-shadow: 0 6px 20px #14141a1f;
+}
+
 .logo {
   display: inline-block;
-  margin: 0 0 12px;
+  margin: 0;
   font-family: "Urbanist", system-ui, sans-serif;
   font-size: clamp(3.5rem, 15vw, 6rem);
   font-weight: 800;
