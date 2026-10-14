@@ -51,8 +51,15 @@ export class SpotifyProvider extends Provider {
       ...init,
       headers: { Authorization: `Bearer ${s.token}`, 'Content-Type': 'application/json' }
     });
-    if (!res.ok) throw new Error(`Spotify ${res.status}`);
-    return res.json();
+    const data = await res.json();
+    if (!res.ok) {
+      const detail = data.error?.message || data.error?.reason || '';
+      const hint = res.status === 403
+        ? ' Se o app estiver em modo Development, confira Users and Access e se o proprietário tem Spotify Premium.'
+        : '';
+      throw new Error(`Spotify ${res.status}${detail ? `: ${detail}` : ''}.${hint}`);
+    }
+    return data;
   }
 
   async findTrack(track) {

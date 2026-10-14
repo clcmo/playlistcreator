@@ -44,3 +44,8 @@ O retorno do login cai na raiz do app: `https://SEU_DOMINIO[/repo]/app/` (com a 
 - Spotify: `https://SEU_DOMINIO/callback/spotify` (em dev: `http://127.0.0.1:5173/callback/spotify`)
 - Deezer: `https://SEU_DOMINIO/callback/deezer`
 - Google: origem JavaScript autorizada `https://SEU_DOMINIO`
+
+## Spotify retorna 403
+
+Em apps no modo **Development**, o Spotify pode permitir o login, mas negar chamadas à API com 403 se a conta usada não estiver autorizada. No Developer Dashboard, abra o app, vá em **Settings > Users and Access** e adicione a conta Spotify utilizada (o modo Development aceita até 5 usuários). O proprietário do app também precisa de Spotify Premium nesse modo. Depois, saia e entre novamente no app.
+Se o erro continuar, confira a mensagem detalhada exibida pelo app e se as permissões `playlist-modify-public` e `playlist-modify-private` foram concedidas.
