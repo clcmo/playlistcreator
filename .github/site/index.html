@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ff1bae" />
+    <link rel="icon" type="image/png" href="./assets/img/favicon.png" />
+    <link rel="apple-touch-icon" href="./assets/img/icon-192.png" />
+    <title>Playlist Creator | Urbanna</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Urbanist:ital,wght@0,600;1,700;1,800&family=Work+Sans:wght@400;600&display=swap" rel="stylesheet" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="./assets/css/main.css" />
+  </head>
+<body>
+<main>
+  <header class="brand">
+    <img class="brand-icon" src="./assets/img/icon-192.png" alt="" />
+    <span class="logo word"><b>urbanna</b></span>
+  </header>
+  <p>Entre com Spotify, YouTube ou Deezer e crie a mesma playlist em todos de uma vez.</p>
+  <a class="btn" href="./app/">Abrir o app</a>
+
+  <section class="current" aria-live="polite">
+    <strong id="version">…</strong>
+    <div class="meta" id="built"></div>
+    <ul id="changes"></ul>
+  </section>
+
+  <h2>Instalar no celular</h2>
+  <ul>
+    <li><b>Android (Chrome):</b> abra o app, menu ⋮ e “Instalar app”.</li>
+    <li><b>iPhone (Safari):</b> botão de compartilhar e “Adicionar à Tela de Início”.</li>
+  </ul>
+
+  <h2>Versões anteriores</h2>
+  <ul class="rel" id="releases"><li class="meta">Carregando…</li></ul>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const li = (text) => Object.assign(document.createElement('li'), { textContent: text });
+
+  fetch('./version.json', { cache: 'no-cache' })
+    .then((r) => r.json())
+    .then((v) => {
+      $('version').textContent = `Versão ${v.version}`;
+      $('built').textContent =
+        `Publicada em ${new Date(v.builtAt).toLocaleString('pt-BR')} · commit ${v.commit.slice(0, 7)}`;
+      $('changes').replaceChildren(...(v.changes.length ? v.changes : ['Sem mudanças registradas.']).map(li));
+      return v.repo && fetch(`https://api.github.com/repos/${v.repo}/releases?per_page=8`);
+    })
+    .then((r) => r && r.json())
+    .then((list) => {
+      const box = $('releases');
+      if (!Array.isArray(list) || !list.length) return box.replaceChildren(li('Nenhuma release ainda.'));
+      box.replaceChildren(...list.map((rel) => {
+        const row = document.createElement('li');
+        const name = document.createElement('a');
+        name.href = rel.html_url; name.textContent = rel.name || rel.tag_name;
+        const meta = document.createElement('span');
+        meta.className = 'meta';
+        meta.textContent = new Date(rel.published_at).toLocaleDateString('pt-BR');
+        const zip = (rel.assets || [])[0];
+        if (zip) {
+          const dl = document.createElement('a');
+          dl.href = zip.browser_download_url; dl.textContent = ' · baixar .zip';
+          meta.append(dl);
+        }
+        row.append(name, meta);
+        return row;
+      }));
+    })
+    .catch(() => {
+      $('releases').replaceChildren(li('Não foi possível carregar o histórico agora.'));
+    });
+</script>
+</body>
+</html>

@@ -1,11 +1,28 @@
-#  Playlist Creator for Spotify
+# Playlist Creator (React + PWA, MVC)
 
+## Rodar
 
-[![GitHub license](https://img.shields.io/github/license/urbanna/playlistcreator-example?style=for-the-badge)](https://github.com/urbanna/playlistcreator-example)
-[![GitHub stars](https://img.shields.io/github/stars/urbanna/playlistcreator-example?style=for-the-badge)](https://github.com/urbanna/playlistcreator-example/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/urbanna/playlistcreator-example?style=for-the-badge)](https://github.com/urbanna/playlistcreator-example/network)
-[![GitHub issues](https://img.shields.io/github/issues/urbanna/playlistcreator-example?style=for-the-badge)](https://github.com/urbanna/playlistcreator-example/issues)
+    cp .env.example .env   # preencha as chaves
+    npm install
+    npm run server &       # BFF (Deezer)
+    npm run dev
 
-This is an example application that creates a playlist using the [Spotify Web API](https://developer.spotify.com/web-api/). 
+## Arquitetura (MVC)
 
-Please check out the **[demo](http://dev.portalurbanna.com.br/)** to try it out!
+- **Model** `src/models` — Track (entrada do usuário) e Session (tokens por provedor)
+- **Providers** `src/providers` — um adaptador por serviço (mesmo contrato `Provider`)
+- **Controller** `src/controllers` — AuthController (SSO/callbacks) e PlaylistController (orquestra)
+- **View** `src/views` — componentes React, sem regra de negócio
+- **BFF** `server/` — secret do Deezer + proxy (CORS)
+
+## Instalar no celular
+
+PWA: `npm run build`, publique em HTTPS e use "Adicionar à tela inicial".
+Adicione `public/icon-192.png` e `public/icon-512.png`.
+Para loja (Play/App Store): empacotar o build com Capacitor.
+
+## Redirect URIs a cadastrar
+
+- Spotify: `https://SEU_DOMINIO/callback/spotify` (em dev: `http://127.0.0.1:5173/callback/spotify`)
+- Deezer: `https://SEU_DOMINIO/callback/deezer`
+- Google: origem JavaScript autorizada `https://SEU_DOMINIO`
